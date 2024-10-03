@@ -19,7 +19,8 @@ enum Direction{
 
 struct Food{
     //TODO Figure out a system where upon collision with the food,
-  //  the spawn mechanic is trigger.
+    //The spawn mechanic is trigger.
+    //Sucessful!
     SDL_Rect object;
     int x = 0, y = 0;
     Food(int x = 0, int y = 0): x(x), y(y){
@@ -130,7 +131,9 @@ public:
             prevY = tempY;
             current = current->next;
         }
-
+        if(body_collision()){
+            reset();
+        }
         dir = direction;
 }
 
@@ -144,22 +147,47 @@ public:
         reset();
     }
 
-    void reset(){
-        //TODO: Further review required. Potential referencing of released memory. 
-        while(tail->previous->previous != nullptr && tail != nullptr){
-            delete tail;
-            tail = tail->previous;
+    void reset() {
+        // Delete all segments except the head and the first body segment
+        //Successfully created a reset function. Forgot to reset the pointers.
+        Segment* current = head->next->next;
+        while (current != nullptr) {
+            Segment* next = current->next;
+            delete current;
+            current = next;
         }
+
+        // Reset to initial state (head and one body segment)
+        head->next->next = nullptr;
+        tail = head->next;
+
+        // Reset direction (assuming UP is the initial direction)
+        dir = Direction::UP;
     }
 
-
+    bool body_collision() {
+        Segment* body = head->next->next; // Start from the segment after the first body segment
+        while (body != nullptr) {
+            
+            if (head->object.x == body->object.x && head->object.y == body->object.y) {
+                return true; 
+            }
+            body = body->next;
+        }
+        return false; 
+}
 
     void render(SDL_Renderer* renderer) {
         Segment* current = head;
+        int count = 0;
         while (current != nullptr) {
-            SDL_SetRenderDrawColor(renderer, 255, 23, 150, 255);
+            if(count != 0)
+                SDL_SetRenderDrawColor(renderer, 255, 23, 150, 255);
+            else
+                SDL_SetRenderDrawColor(renderer, 255, 93, 120, 255);
             SDL_RenderFillRect(renderer, &current->object);
             current = current->next;
+            ++count;
         }
 }
 
@@ -265,9 +293,9 @@ int main() {
                             direction = prevDir;
                         } 
                         break;
-                        /*Depracated
+                    
                     case SDLK_w: snake.test(); break;
-                    case SDLK_s: snake.reset(); break;*/
+                    case SDLK_s: snake.reset(); break;
                     default: break;
                 }
             }
