@@ -1,10 +1,13 @@
+
 #ifdef _WIN32
     #define SDL_MAIN_HANDLED
 #endif
-
+#include <SDL2/SDL_render.h>
+#include <SDL2/SDL_surface.h>
 #include <SDL2/SDL.h>
 #include <iostream>
 #include <stdlib.h>
+#include <SDL2/SDL_ttf.h>
 #include <time.h>
 
 #define SCREEN_WIDTH 1000
@@ -30,15 +33,15 @@ struct Food{
     void spawn(SDL_Renderer* renderer, bool flag = false){
       if(flag){
         object.x = (rand() % 980) + 1;
-        object.y = (rand() & 980) - 1;        
+        object.y = (rand() & 980) - 1;
     }
-              
+
         SDL_SetRenderDrawColor(renderer,0,255,233,255);
         SDL_RenderFillRect(renderer, &object);
     }
-    
-};
 
+};
+int score = 0;
 class Snake{
   private:
     int x, y;
@@ -76,13 +79,13 @@ class Snake{
         }
         else if(dir == Direction::LEFT){
             tail->next = new Segment(tail->previous->object.x+20, tail->previous->object.y);
-            tail->next->previous = tail;	
+            tail->next->previous = tail;
         }
         else if(dir == Direction::RIGHT){
             tail->next = new Segment(tail->previous->object.x-20, tail->previous->object.y);
             tail->next->previous = tail;
         }
-        
+
     }
 
 public:
@@ -121,7 +124,7 @@ public:
         Segment* current = head;
         int prevX = head->object.x;
         int prevY = head->object.y;
-        
+
         while (current->next != nullptr) {
             int tempX = current->next->object.x;
             int tempY = current->next->object.y;
@@ -168,13 +171,14 @@ public:
     bool body_collision() {
         Segment* body = head->next->next; // Start from the segment after the first body segment
         while (body != nullptr) {
-            
+
             if (head->object.x == body->object.x && head->object.y == body->object.y) {
-                return true; 
+                score = 0;
+                return true;
             }
             body = body->next;
         }
-        return false; 
+        return false;
 }
 
     void render(SDL_Renderer* renderer) {
@@ -192,7 +196,7 @@ public:
 }
 
     bool collision(Food& object){
-        //sets up collision system that removes the fruit and extends the snake. 
+        //sets up collision system that removes the fruit and extends the snake.
         //TODO Plan the specifics around this feature
         //TODO Come up with a more effective collision system
         //TODO Fullfilled. Features implemented
@@ -200,7 +204,7 @@ public:
             //iterate to check for x
             for(int j = 0; j < 20; ++j){
                 //iterate to check for y
-                //first condition checks for basic alignment. Second condition checks if the top x and y of snake make contact. third condition checks if an side of 
+                //first condition checks for basic alignment. Second condition checks if the top x and y of snake make contact. third condition checks if an side of
                 //head makes contact with food.
                 if(head->object.x == object.object.x && head->object.y == object.object.y || head->object.x  == object.object.x + i && head->object.y == object.object.y + j
                 || head->object.x + i == object.object.x && head->object.y + i == object.object.y + j){
@@ -209,7 +213,7 @@ public:
                 }
             }
         }
-        
+
         return false;
     }
 
@@ -230,7 +234,7 @@ int main() {
         return -1;
     }
 
-    SDL_Window* window = SDL_CreateWindow("Snake", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 
+    SDL_Window* window = SDL_CreateWindow("Snake", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                                           SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_RESIZABLE);
     if (window == nullptr) {
         std::cerr << "SDL failed to create window: " << SDL_GetError() << std::endl;
@@ -245,6 +249,16 @@ int main() {
         SDL_Quit();
         return -1;
     }
+
+    TTF_Init();
+    TTF_Font* font = TTF_OpenFont("ARIAL.TTF", 80);
+    SDL_Color textColor = {255,255,255,255};
+
+
+    SDL_Surface* textSurface = nullptr;
+    SDL_Texture* scoringBoard = nullptr;
+
+    SDL_Rect textPos = {SCREEN_WIDTH - 90,0,80,80};
 
     Snake snake(500, 500);
     Food food(700, 700);
@@ -265,13 +279,13 @@ int main() {
                         prevDir = direction;
                         direction = Direction::UP;
                         if(prevDir == Direction::DOWN)
-                            direction = prevDir; 
+                            direction = prevDir;
 
-                        
+
                         break;
                     case SDLK_DOWN:
                         prevDir = direction;
-                        direction = Direction::DOWN; 
+                        direction = Direction::DOWN;
 
                         if(prevDir == Direction::UP){
                             direction = prevDir;
@@ -283,37 +297,46 @@ int main() {
 
                       if(prevDir == Direction::RIGHT){
                             direction = prevDir;
-                        } 
+                        }
                       break;
                     case SDLK_RIGHT:
-                        prevDir = direction; 
+                        prevDir = direction;
                         direction = Direction::RIGHT;
 
                         if(prevDir == Direction::LEFT){
                             direction = prevDir;
-                        } 
+                        }
                         break;
-                    
+
                     case SDLK_w: snake.test(); break;
                     case SDLK_s: snake.reset(); break;
                     default: break;
                 }
             }
         }
-        //TODO Implement Deltaime 
+        //TODO Implement Deltaime
         //TODO Implement something that stops the snake from going in itself
-        snake.update(0.5f, direction); 
-    
+        snake.update(0.5f, direction);
+
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
         snake.render(renderer);
         if (snake.collision(food)) {
             food.spawn(renderer, true);
+            ++score;
         } else {
             food.spawn(renderer, false);
         }
+
+
+        textSurface = TTF_RenderText_Solid(font,std::to_string(score).c_str(), textColor);
+        scoringBoard = SDL_CreateTextureFromSurface(renderer,textSurface);
+
+        SDL_RenderCopy(renderer, scoringBoard, nullptr, &textPos);
+        // Present the frame after all rendering is done
         SDL_RenderPresent(renderer);
-		SDL_Delay(16);
+
+        SDL_Delay(16);
     }
 
     SDL_DestroyRenderer(renderer);
