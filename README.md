@@ -8,12 +8,11 @@ This is a classic Snake game implemented using the SDL2 (Simple DirectMedia Laye
 - Food spawning and collision detection
 - Snake growth upon eating food
 - Wrapping around screen edges
+- Scoring System
+- Self-collision detection
 
 ## Planned Features
-- Snake self-collision detection
 - Menu screen
-- Score system
-- Enhanced graphics and sprites
 
 ## How to Play
 1. Use arrow keys to control the snake's direction
@@ -31,7 +30,7 @@ This is a classic Snake game implemented using the SDL2 (Simple DirectMedia Laye
 To compile the game, use the following command:
 
 ```bash
-g++ -o snake snake2.cpp -lSDL2
+g++ -o snake snake2.cpp -lSDL2 -lSDL2_ttf
 ```
 
 ### Running the Game
@@ -47,7 +46,7 @@ After compilation, run the game with:
 - Game logic includes custom collision detection and snake movement algorithms
 
 ## Development Status
-This game is currently in active development. Key features like self-collision, menu system, and scoring are planned for future updates.
+This game is currently in active development. Menu system is still in development, otherwise scoring and self-collision are implemented.
 
 ## Contributing
 Contributions, ideas, and feedback are welcome! Feel free to open an issue or submit a pull request.
