@@ -1,9 +1,7 @@
-
 #ifdef _WIN32
     #define SDL_MAIN_HANDLED
 #endif
-#include <SDL2/SDL_render.h>
-#include <SDL2/SDL_surface.h>
+
 #include <SDL2/SDL.h>
 #include <iostream>
 #include <stdlib.h>
@@ -13,6 +11,7 @@
 #define SCREEN_WIDTH 1000
 #define SCREEN_HEIGHT 1000
 
+//This enum will track the snake's direction
 enum Direction{
 	UP,
 	DOWN,
@@ -31,6 +30,7 @@ struct Food{
     }
 
     void spawn(SDL_Renderer* renderer, bool flag = false){
+      //The flag allows us to easily communicate contact between serpent and food item.
       if(flag){
         object.x = (rand() % 980) + 1;
         object.y = (rand() & 980) - 1;
@@ -41,7 +41,9 @@ struct Food{
     }
 
 };
-int score = 0;
+
+int score = 0; //Score globally available for easy access. Find better solution. Might be bad practice.
+
 class Snake{
   private:
     int x, y;
@@ -49,10 +51,11 @@ class Snake{
     Direction dir;
 
     struct Segment {
-    SDL_Rect object;
-    Segment* next = nullptr;
-    Segment* previous = nullptr;
-
+//Creates each segment on the snake
+     SDL_Rect object;
+     Segment* next = nullptr;
+     Segment* previous = nullptr;
+	
     Segment(int x = 0, int y = 0) {
         object = {x, y, 20, 20};
     }
@@ -64,7 +67,7 @@ class Snake{
     void extend_serpent(){
 		//TODO Implement collision system where this function will be called
     //TODO When snake goes of bounds, the head must emerge from the other side.
-    //
+    //Both TODO's successfully completed, signed Euclideus.
         while(tail->next != nullptr){
             tail = tail->next;
         }
@@ -101,6 +104,7 @@ public:
         if (direction == Direction::UP) {
             head->object.y -= dy;
             if(head->object.y <= 0){
+		//Will make snake's head and body emerge from the other side of the screen
                 head->object.y = SCREEN_HEIGHT;
             }
         } else if (direction == Direction::DOWN) {
@@ -142,11 +146,12 @@ public:
 
     void test(){
         //TODO: Use one key to artificially extend snake.
-        //Success! Depracated as a result
+        //Success! Depracated as a result. Testing purposes only
         extend_serpent();
     }
 
     void test2(){
+	//Success again. Artificial reset. Depracated as a result. Remains for testing purposes.
         reset();
     }
 
@@ -280,8 +285,6 @@ int main() {
                         direction = Direction::UP;
                         if(prevDir == Direction::DOWN)
                             direction = prevDir;
-
-
                         break;
                     case SDLK_DOWN:
                         prevDir = direction;
