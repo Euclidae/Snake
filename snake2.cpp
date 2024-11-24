@@ -256,14 +256,14 @@ int main() {
     }
 
     TTF_Init();
-    TTF_Font* font = TTF_OpenFont("ARIAL.TTF", 80);
+    TTF_Font* font = TTF_OpenFont("ARIAL.TTF", 40);
     SDL_Color textColor = {255,255,255,255};
 
 
     SDL_Surface* textSurface = nullptr;
     SDL_Texture* scoringBoard = nullptr;
 
-    SDL_Rect textPos = {SCREEN_WIDTH - 90,0,80,80};
+    SDL_Rect textPos = {SCREEN_WIDTH - 90,0,40,40};
 
     Snake snake(500, 500);
     Food food(700, 700);
